@@ -19,7 +19,8 @@ $app->group(['prefix' => 'api'], function () use ($app) {
 
 $app->get('logbonus', 'LogBonusController@index');
 $app->get('logbonus/{id}', 'LogBonusController@show');
-$app->get('logbonus/testing/{member_id}/{tgl_bonus}', 'LogBonusController@showmember');
+//$app->get('logbonus/testing/{member_id}/{tgl_bonus}', 'LogBonusController@showmember');
+$app->get('logbonus/testing/{member_id}/{tanggal}', 'LogBonusController@showmember');
 $app->post('logbonus', 'LogBonusController@store');
 $app->put('logbonus/{id}', 'LogBonusController@update');
 $app->delete('logbonus/{id}', 'LogBonusController@delete');

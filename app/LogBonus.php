@@ -21,9 +21,9 @@ class LogBonus extends Model
    *
    * @var array
    */
-  protected $fillable = [
-    'id','member_id','from_member','tanggal','tgl_bonus','amount','jenis_bonus',
-  ];
+  // protected $fillable = [
+  //   'id','member_id','from_member','month(tanggal)','tgl_bonus','sum(amount)','jenis_bonus',
+  // ];
   /**
    * One to one relationships
    */

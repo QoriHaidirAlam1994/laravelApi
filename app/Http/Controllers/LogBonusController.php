@@ -24,13 +24,31 @@ class LogBonusController extends Controller
         return response ($data);
     }
 
-    public function showmember($member_id, $tgl_bonus){
-        $data = DB::table('member AS m')
-        ->join('log_bonus_a AS mt', 'm.member_id', '=', 'mt.member_id')
-        ->select('m.member_id', 'm.nama', 'mt.amount', 'mt.tgl_bonus')
-        ->where([['m.member_id', '=', $member_id],['mt.tgl_bonus', '=', $tgl_bonus]])
-        ->get();
-        return response ($data);
+    public function showmember($member_id, $tanggal){
+        $data =  DB::table('log_bonus_a as lb')
+                    ->join('member as m', 'm.member_id', '=', 'lb.member_id')
+                    ->select( 'm.nama', DB::raw('sum(lb.amount) as jumlah'), DB::raw('month(lb.tanggal) as bulan'))
+                    ->where([[DB::raw('year(lb.tanggal)'), '=', $tanggal], ['m.member_id', '=', $member_id]])
+                    ->groupBy(DB::raw('month(lb.tanggal)'))
+                    ->get();
+        $bonus = DB::table('log_bonus_a')->select(DB::raw('sum(amount) as jumlah'), DB::raw('month(tanggal) as bulan'))
+                    ->where([[DB::raw('year(tanggal)'), '=', $tanggal], ['member_id', '=', $member_id]])
+                    ->groupBy(DB::raw('month(tanggal)'))
+                    ->get();
+                    $nama = $data[0]->nama;
+                    return response()->json([
+                        'member_id' => $member_id,
+                        'nama' => $nama,
+                        'bonus' => $bonus
+                    ]);
+                     
+        // $data = DB::table('member AS m')
+        // ->join('log_bonus_a AS mt', 'm.member_id', '=', 'mt.member_id')
+        // ->select('m.member_id', 'm.nama', 'mt.amount', 'mt.tgl_bonus')
+        // ->where([['m.member_id', '=', $member_id],['mt.tgl_bonus', '=', $tgl_bonus]])
+        // ->get();
+        // return response ($data);
+
     }
     
     
