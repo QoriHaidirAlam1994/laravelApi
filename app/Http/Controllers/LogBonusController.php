@@ -35,6 +35,16 @@ class LogBonusController extends Controller
                     ->where([[DB::raw('year(tanggal)'), '=', $tanggal], ['member_id', '=', $member_id]])
                     ->groupBy(DB::raw('month(tanggal)'))
                     ->get();
+                    
+                    if (sizeof($data) <= 0) {
+                        $response =
+                        [
+                            'status' => 0,
+                            'errors' => 'salah input'
+                        ];
+                        return response()->json($response, 400, [], JSON_PRETTY_PRINT)->send();
+                        die;
+                    }
                     $nama = $data[0]->nama;
                     return response()->json([
                         'member_id' => $member_id,
@@ -50,7 +60,6 @@ class LogBonusController extends Controller
         // return response ($data);
 
     }
-    
     
     public function store (Request $request){
         $data = new LogBonus();
