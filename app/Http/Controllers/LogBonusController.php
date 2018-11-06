@@ -1,6 +1,8 @@
 <?php
 
 namespace App\Http\Controllers;
+
+use Auth;
 use App\LogBonus;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -11,9 +13,10 @@ class LogBonusController extends Controller
      *
      * @return void
      */
-    public function __construct()
+    public function __construct(Request $request)
     {
-        //$this->middleware('auth');
+        $this->middleware('auth',['except'=>[]]);
+
     }
     public function index(){
         $data = LogBonus::all();
@@ -24,7 +27,8 @@ class LogBonusController extends Controller
         return response ($data);
     }
 
-    public function showmember($member_id, $tanggal){
+    public function showmember($tanggal){
+        $member_id = Auth::user()->getAttributes()['member_id'];
         $data =  DB::table('log_bonus_a as lb')
                     ->join('member as m', 'm.member_id', '=', 'lb.member_id')
                     ->select( 'm.nama', DB::raw('sum(lb.amount) as jumlah'), DB::raw('month(lb.tanggal) as bulan'))
@@ -62,20 +66,30 @@ class LogBonusController extends Controller
     }
     
     public function store (Request $request){
+        // $data = DB::table('log_bonus_a')->insert('member_id', 'from_member', 'tanggal', 'tgl_bonus', 'amount', 'jenis_bonus')
+        //             ->get();
         $data = new LogBonus();
-        $data->activity = $request->input('activity');
-        $data->description = $request->input('description');
+        $member_id = Auth::user()->getAttributes()['member_id'];
+        $data->member_id = $member_id;
+        $data->from_member = $request->input('from_member');
+        $data->tanggal = $request->input('tanggal');
+        $data->tgl_bonus = $request->input('tgl_bonus');
+        $data->amount = $request->input('amount');
+        $data->jenis_bonus = $request->input('jenis_bonus');
         $data->save();
     
-        return response('Berhasil Tambah Data');
+        return response()->json([
+            'message' => 'success',
+            'data' => $data
+        ]);
     }
     public function update(Request $request, $id)
     {
-        $data = Product::find($id);
+        $data = LogBonus::find($id);
         $data->update($request->all());
 
         return response()->json([
-            'message' => 'Successfull update product'
+            'message' => 'Successfull Bonus'
         ]);
     }
 
@@ -86,5 +100,50 @@ class LogBonusController extends Controller
         return response()->json([
             'message' => 'Successfull delete product'
         ]);
+    }
+
+    public function validate(Request $request, array $rules, array $messages = [], array $customAttributes = [])
+    {
+
+        $validator = $this->getValidationFactory()->make($request->all(), $rules, $messages, $customAttributes);
+
+        if ($validator->fails()) {
+            $response = [
+                'status' => 0,
+                'errors' => $validator->errors()
+            ];
+
+
+            if ($request->isMethod('OPTIONS'))
+            {
+                $headers = [
+                    'Access-Control-Allow-Origin'      => '*',
+                    'Access-Control-Allow-Methods'     => 'GET,POST,OPTIONS, PUT, DELETE',
+                    'Access-Control-Allow-Credentials' => 'true',
+                    'Access-Control-Max-Age'           => '86400',
+                    // 'Access-Control-Allow-Headers'     => 'Content-Type, Authorization, X-Requested-With',
+                    'Access-Control-Allow-Headers'     => '*',
+                    'Content-Length'=>'0',
+                    'Content-Type'=>'application/json'
+                ];
+
+                //return response()->json('{"method":"OPTIONS"}', 200, $headers);
+                return response()->json(["method"=>"OPTIONS"], 200, $headers);
+
+
+            }
+
+            response()->json($response, 400, [], JSON_PRETTY_PRINT)
+                ->header('Access-Control-Allow-Origin','*')
+                ->header('Access-Control-Allow-Methods','POST, GET, OPTIONS, PUT, DELETE')
+                ->header('Access-Control-Allow-Credentials','true')
+                ->header('Access-Control-Max-Age','86400')
+                ->header('Access-Control-Allow-Headers','*')
+                ->send();
+            die();
+
+        }
+
+        return true;
     }
 }

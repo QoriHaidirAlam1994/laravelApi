@@ -18,4 +18,8 @@ class Member extends Model
 
 
    protected $table = 'member'; //nama table yang kita buat lewat migration adalah todo
+
+   protected $fillable = [
+    'photo',
+];
 }
