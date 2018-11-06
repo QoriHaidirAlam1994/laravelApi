@@ -30,6 +30,7 @@ class MemberController extends Controller
     }
     public function store (Request $request){
         $data = new Member();
+        // dd($data);
         $data->member_id = $request->input('member_id');
         $data->password = md5('password');
         $data->nama = $request->input('nama');
@@ -61,19 +62,25 @@ class MemberController extends Controller
         {
             $member = new Member();
 
+            $member->member_id = $request->input('member_id');
+            
             $file = $request->file('photo');
-            dd($file);
+            
             $filename = $file->getClientOriginalName();
-            $request->file('photo')->move('/public/upload', $filename);
+
+            $destinationPath ="public/upload";
+            // dd($destinationPath);
+            
+            $request->file('photo')->move($destinationPath, $filename);
             
             $member->photo = $filename;
-            $member->save();
             
-            $res['success'] = true;
-            $res['message'] = "Success update foto member.";
-            $res['data'] = $member;
+            $member->save();
 
-
+            return response()->json([
+                'message' => "Success update foto member.",
+                'data' => $member
+            ]);
         }
         
 
